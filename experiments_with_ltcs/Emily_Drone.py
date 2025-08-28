@@ -106,9 +106,9 @@ class Custom_CE_Loss(tf.keras.losses.Loss):
         ydot = tf.zeros(tf.shape(x_z),dtype=tf.dtypes.float32)
         zdot = tf.zeros(tf.shape(x_z),dtype=tf.dtypes.float32)
         
-        p = 0
-        q = 0
-        r = 0
+        p = tf.zeros(tf.shape(x_z),dtype=tf.dtypes.float32)
+        q = tf.zeros(tf.shape(x_z),dtype=tf.dtypes.float32)
+        r = tf.zeros(tf.shape(x_z),dtype=tf.dtypes.float32)
         
         w_hover1 = tf.math.divide_no_nan(tf.math.multiply(mB,g)/4,kTh)
         wdot_hover1 = tf.zeros(tf.shape(x_z),dtype=tf.dtypes.float32)
@@ -146,7 +146,7 @@ class Custom_CE_Loss(tf.keras.losses.Loss):
         
         
         limitLoop = 144
-        tau = 0.00005
+        tau = 0.01
         a = np.float32(np.array([100000.0]))
         stableEps = tf.constant(a)
         
@@ -169,42 +169,42 @@ class Custom_CE_Loss(tf.keras.losses.Loss):
             dummyq3 = quat3[:, :, i-1] + tau * (-0.5*tf.math.multiply(p[:,:,i-1],quat2[:,:,i-1])+0.5*tf.math.multiply(q[:,:,i-1],quat1[:,:,i-1])+0.5*tf.math.multiply(r[:,:,i-1],quat0[:,:,i-1]))
             
             
-            wddotM1 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover1[:, :, i-1])-w_hover1[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor1[:, :, i-1]),tf.math.square(tau2))
-            wddotM2 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover2[:, :, i-1])-w_hover2[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor2[:, :, i-1]),tf.math.square(tau2))
-            wddotM3 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover1[:, :, i-1])-w_hover1[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor3[:, :, i-1]),tf.math.square(tau2))
-            wddotM4 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover1[:, :, i-1])-w_hover1[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor4[:, :, i-1]),tf.math.square(tau2))
+            wddotM1 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover1[:, :, i-1])-w_hover1[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor1[:, :, i-1]),tf.math.square(tau2)))
+            wddotM2 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover2[:, :, i-1])-w_hover2[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor2[:, :, i-1]),tf.math.square(tau2)))
+            wddotM3 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover1[:, :, i-1])-w_hover1[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor3[:, :, i-1]),tf.math.square(tau2)))
+            wddotM4 = (-2.0* tf.math.multiply(tf.math.multiply(damp,tau2),wdot_hover1[:, :, i-1])-w_hover1[:, :, i-1] + tf.math.divide_no_nan(tf.math.multiply(kp,self.y_uMotor4[:, :, i-1]),tf.math.square(tau2)))
             
-            w_hover1[:, :, i-1] = tf.clip_by_value(w_hover1[:, :, i-1], self.y_minMotor, self.y_maxMotor)
-            w_hover2[:, :, i-1] = tf.clip_by_value(w_hover2[:, :, i-1], self.y_minMotor, self.y_maxMotor)
-            w_hover3[:, :, i-1] = tf.clip_by_value(w_hover3[:, :, i-1], self.y_minMotor, self.y_maxMotor)
-            w_hover4[:, :, i-1] = tf.clip_by_value(w_hover4[:, :, i-1], self.y_minMotor, self.y_maxMotor)
+            w_hover1M1 = tf.clip_by_value(w_hover1[:, :, i-1], self.y_minMotor[0, 0], self.y_maxMotor[0, 0])
+            w_hover2M1 = tf.clip_by_value(w_hover2[:, :, i-1], self.y_minMotor[0, 0], self.y_maxMotor[0, 0])
+            w_hover3M1 = tf.clip_by_value(w_hover3[:, :, i-1], self.y_minMotor[0, 0], self.y_maxMotor[0, 0])
+            w_hover4M1 = tf.clip_by_value(w_hover4[:, :, i-1], self.y_minMotor[0, 0], self.y_maxMotor[0, 0])
             
             
-            ThrM1 = tf.math.multiply(kTh,tf.math.square(w_hover1[:,:,i-1]))
-            ThrM2 = tf.math.multiply(kTh,tf.math.square(w_hover2[:,:,i-1]))
-            ThrM3 = tf.math.multiply(kTh,tf.math.square(w_hover3[:,:,i-1]))
-            ThrM4 = tf.math.multiply(kTh,tf.math.square(w_hover4[:,:,i-1]))
-            TorM1 = tf.math.multiply(kTo,tf.math.square(w_hover1[:,:,i-1]))
-            TorM2 = tf.math.multiply(kTo,tf.math.square(w_hover2[:,:,i-1]))
-            TorM3 = tf.math.multiply(kTo,tf.math.square(w_hover3[:,:,i-1]))
-            TorM4 = tf.math.multiply(kTo,tf.math.square(w_hover4[:,:,i-1]))            
+            ThrM1 = tf.math.multiply(kTh,tf.math.square(w_hover1M1))
+            ThrM2 = tf.math.multiply(kTh,tf.math.square(w_hover2M1))
+            ThrM3 = tf.math.multiply(kTh,tf.math.square(w_hover3M1))
+            ThrM4 = tf.math.multiply(kTh,tf.math.square(w_hover4M1))
+            TorM1 = tf.math.multiply(kTo,tf.math.square(w_hover1M1))
+            TorM2 = tf.math.multiply(kTo,tf.math.square(w_hover2M1))
+            TorM3 = tf.math.multiply(kTo,tf.math.square(w_hover3M1))
+            TorM4 = tf.math.multiply(kTo,tf.math.square(w_hover4M1))            
             
             # wind effect not modeled
             
-            dummyxdot = xdot[:, :, i-1] + tau * (tf.math.multiply(tf.math.multiply(Cd,tf.math.sign(-xdot[:,:,i-1])),tf.math.square(xdot[:,:,i-1])) + 2*tf.math.multiply((tf.math.multiply(quat0,quat2)+tf.math.multiply(quat1,quat3)),(ThrM1+ThrM2+ThrM3+ThrM4)))/mB
-            dummyydot = ydot[:, :, i-1] + tau * (tf.math.multiply(tf.math.multiply(Cd,tf.math.sign(-ydot[:,:,i-1])),tf.math.square(ydot[:,:,i-1])) - 2*tf.math.multiply((tf.math.multiply(quat0,quat1)-tf.math.multiply(quat2,quat3)),(ThrM1+ThrM2+ThrM3+ThrM4)))/mB            
+            dummyxdot = xdot[:, :, i-1] + tau * (tf.math.multiply(tf.math.multiply(Cd,tf.math.sign(-xdot[:,:,i-1])),tf.math.square(xdot[:,:,i-1])) + 2*tf.math.multiply((tf.math.multiply(quat0[:,:,i-1],quat2[:,:,i-1])+tf.math.multiply(quat1[:,:,i-1],quat3[:,:,i-1])),(ThrM1+ThrM2+ThrM3+ThrM4)))/mB
+            dummyydot = ydot[:, :, i-1] + tau * (tf.math.multiply(tf.math.multiply(Cd,tf.math.sign(-ydot[:,:,i-1])),tf.math.square(ydot[:,:,i-1])) - 2*tf.math.multiply((tf.math.multiply(quat0[:,:,i-1],quat1[:,:,i-1])-tf.math.multiply(quat2[:,:,i-1],quat3[:,:,i-1])),(ThrM1+ThrM2+ThrM3+ThrM4)))/mB            
             dummyzdot = zdot[:, :, i-1] + tau * (tf.math.multiply(tf.math.multiply(-Cd,tf.math.sign(zdot[:,:,i-1])),tf.math.square(zdot[:,:,i-1])) + tf.math.multiply((ThrM1+ThrM2+ThrM3+ThrM4),(tf.math.square(quat0[:,:,i-1])-tf.math.square(quat1[:,:,i-1])-tf.math.square(quat2[:,:,i-1])+tf.math.square(quat3[:,:,i-1])))-g*mB)/mB    
             
             
-            dummyp = p[:,:,i-1] + tau * tf.math.divide_no_nan((tf.math.multiply(tf.math.multiply(IByy-IBzz,q[:,:,i-1]),r[:,:,i-1]) + tf.math.multiply(tf.math.multiply(IRzz,(w_hover1[:,:,i-1]-w_hover2[:,:,i-1]+w_hover3[:,:,i-1]-w_hover4[:,:,i-1])),q[:,:,i-1])+tf.math.multiply((ThrM1-ThrM2-ThrM3+ThrM4),dym)),IBxx)
-            dummyq = q[:,:,i-1] + tau * tf.math.divide_no_nan((tf.math.multiply(tf.math.multiply(IBzz-IBxx,p[:,:,i-1]),r[:,:,i-1]) - tf.math.multiply(tf.math.multiply(IRzz,(w_hover1[:,:,i-1]-w_hover2[:,:,i-1]+w_hover3[:,:,i-1]-w_hover4[:,:,i-1])),p[:,:,i-1])+tf.math.multiply((-ThrM1-ThrM2+ThrM3+ThrM4),dxm)),IByy)
+            dummyp = p[:,:,i-1] + tau * tf.math.divide_no_nan((tf.math.multiply(tf.math.multiply(IByy-IBzz,q[:,:,i-1]),r[:,:,i-1]) + tf.math.multiply(tf.math.multiply(IBzz,(w_hover1M1-w_hover2M1+w_hover3M1-w_hover4M1)),q[:,:,i-1])+tf.math.multiply((ThrM1-ThrM2-ThrM3+ThrM4),dym)),IBxx)
+            dummyq = q[:,:,i-1] + tau * tf.math.divide_no_nan((tf.math.multiply(tf.math.multiply(IBzz-IBxx,p[:,:,i-1]),r[:,:,i-1]) - tf.math.multiply(tf.math.multiply(IBzz,(w_hover1M1-w_hover2M1+w_hover3M1-w_hover4M1)),p[:,:,i-1])+tf.math.multiply((-ThrM1-ThrM2+ThrM3+ThrM4),dxm)),IByy)
             dummyr = r[:,:,i-1] + tau * tf.math.divide_no_nan((tf.math.multiply(tf.math.multiply(IBxx-IBzz,p[:,:,i-1]),q[:,:,i-1]) + TorM1-TorM2+TorM3-TorM4),IBzz)
             
             
-            dummy_w_hover1 = w_hover1[:, :, i-1] + tau*wdot_hover1[:,:,i-1]
-            dummy_w_hover2 = w_hover2[:, :, i-1] + tau*wdot_hover2[:,:,i-1]
-            dummy_w_hover3 = w_hover3[:, :, i-1] + tau*wdot_hover3[:,:,i-1]
-            dummy_w_hover4 = w_hover4[:, :, i-1] + tau*wdot_hover4[:,:,i-1] 
+            dummy_w_hover1 = w_hover1M1 + tau*wdot_hover1[:,:,i-1]
+            dummy_w_hover2 = w_hover2M1 + tau*wdot_hover2[:,:,i-1]
+            dummy_w_hover3 = w_hover3M1 + tau*wdot_hover3[:,:,i-1]
+            dummy_w_hover4 = w_hover4M1 + tau*wdot_hover4[:,:,i-1] 
             
             dummy_wdot_hover1 = wdot_hover1[:,:,i-1] + tau*wddotM1
             dummy_wdot_hover2 = wdot_hover2[:,:,i-1] + tau*wddotM2
@@ -338,7 +338,7 @@ class HarData:
         
 
         
-        shape = tf.shape(test_basal)
+        shape = tf.shape(test_x_x)
         with tf.compat.v1.Session() as sess:
             numpy_number = sess.run(shape[1])
         Nloop = numpy_number
