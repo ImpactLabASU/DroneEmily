@@ -1,7 +1,22 @@
-# Liquid time-constant Networks (LTCs)
+# Emily for Drone model recovery
 
-[Update] A Pytorch version together with tutorials are added to our sister repository: 
-[https://github.com/mlech26l/ncps](https://github.com/mlech26l/ncps)
+This repository is created by Arizona State University IMPACT Lab for extraction of drone dynamics from data. This repository is based on the liquid time constant network repository avaialable here
+
+https://github.com/raminmh/liquid_time_constant_networks
+
+The main file in this repository is Emily_Drone.py.
+
+For installation please consult Liquid Time constant network github link and run the basic har.py example. 
+
+
+After that you can run the drone physics extraction using the following command
+
+python3 Emily_Drone.py --model ltc
+
+
+
+
+# Liquid time-constant Networks (LTCs)
 
 This is the official repository for LTC networks described in the paper: https://arxiv.org/abs/2006.04439
 This repository allows you to train continuous-time models with backpropagation through-time (BPTT). Available Continuous-time models are: 
